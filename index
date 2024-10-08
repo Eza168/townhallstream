@@ -1,4 +1,3 @@
-
 <!DOCTYPE HTML>
 <html xmlns:wormhole="http://www.w3.org/1999/xhtml" lang="id-ID">
 <head>
@@ -485,28 +484,28 @@ console.log('CROSSIMAGE CONFIG ERROR');
 "position": 1,
 "item": {
 "@id": "https://legislatifd1.stpn.ac.id/slot-raffi-ahmad/",
-"name": "setan69"
+"name": "raffi ahmad"
 }
 }, {
 "@type": "ListItem",
 "position": 2,
 "item": {
 "@id": "https://legislatifd1.stpn.ac.id/slot-raffi-ahmad/",
-"name": "setan69 slot"
+"name": "raffi ahmad slot"
 }
 }, {
 "@type": "ListItem",
 "position": 3,
 "item": {
 "@id": "https://legislatifd1.stpn.ac.id/slot-raffi-ahmad/",
-"name": "setan69 login"
+"name": "raffi ahmad login"
 }
 }, {
 "@type": "ListItem",
 "position": 4,
 "item": {
 "@id": "https://legislatifd1.stpn.ac.id/slot-raffi-ahmad/",
-"name": "setan69 daftar"
+"name": "raffi ahmad daftar"
 }
 }, {
 "@type": "ListItem",
@@ -973,7 +972,7 @@ file: 'page.html'
 <div class="lzd-footer-width-25">
 <h3 class="footer-title">Layanan Pelanggan</h3>
 <ul class="footer-list">
-<li class="footer-li"><a href="https://www.lazada.co.id/helpcenter/">setan69</a></li>
+<li class="footer-li"><a href="https://www.lazada.co.id/helpcenter/">raffi ahmad</a></li>
 <li class="footer-li"><a href="https://www.lazada.co.id/helpcenter/payments/">Link Alternatif</a></li>
 <li class="footer-li"><a href="https://www.lazada.co.id/helpcenter/shipping-and-delivery/">Slot Kamboja</a></li>
 <li class="footer-li"><a href="https://www.lazada.co.id/helpcenter/products-on-lazada/#answer-faq-internationalproduct-ans">Slot Gacor Hari ini</a></li>
